@@ -6,6 +6,15 @@ class HTMLNode():
         self.children = children
         self.props = props
 
+    def __repr__(self):
+        return f"tag: {self.tag}, value: {self.value}, children: {self.children}, props: {self.props_to_html()} "
+
+    def __eq__(self, other):
+        return (self.tag == other.tag and 
+                self.value == other.value and 
+                self.children == other.children and 
+                self.props == other.props)
+    
     def to_html(self):
         raise NotImplementedError
 
@@ -17,15 +26,6 @@ class HTMLNode():
         for key in self.props:
             formated_string += f'{key}="{self.props[key]}" '
         return formated_string
-
-    def __repr__(self):
-        print(f"tag: {self.tag}, value: {self.value}, children: {self.children}, props: {self.props_to_html()} ")
-
-    def __eq__(self, other):
-        return (self.tag == other.tag and 
-                self.value == other.value and 
-                self.children == other.children and 
-                self.props == other.props)
 
 class LeafNode(HTMLNode):
     def __init__(self, tag:str, value:str, props:dict= None):
@@ -43,9 +43,23 @@ class LeafNode(HTMLNode):
 
         return f"<{self.tag}{props_str}>{self.value}</{self.tag}>"
     
-    def __repr__(self):
-        print(f"tag: {self.tag}, value: {self.value}, props: {self.props_to_html()} ")
 
+class ParentNode(HTMLNode):
+    def __init__(self, tag:str, children:list, props:dict = None):
+        super().__init__(tag= tag, children= children, props= props)
+    
+    def to_html(self):
+        if self.tag is None:
+            raise ValueError("Parent node must have tag!")
+        if self.children is None:
+            raise ValueError("Parent node must have children node!")
         
+        combined_html = ""
+
+        for child in self.children:
+            combined_html += child.to_html()
+            
+        return f"<{self.tag}>{combined_html}</{self.tag}>"
+    
 
 
